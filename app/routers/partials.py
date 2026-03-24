@@ -53,14 +53,12 @@ def _render_todo_list(request: Request, todos: list[Todo]) -> HTMLResponse:
     incomplete_todos = [t for t in todos if not t.is_completed]
     completed_todos = [t for t in todos if t.is_completed]
     templates = request.app.state.templates
-    return templates.TemplateResponse(
-        request=request,
-        name="partials/todo-list.html",
-        context={
-            "incomplete_todos": incomplete_todos,
-            "completed_todos": completed_todos,
-        },
-    )
+    context = {
+        "request": request,
+        "incomplete_todos": incomplete_todos,
+        "completed_todos": completed_todos,
+    }
+    return templates.TemplateResponse("partials/todo-list.html", context)
 
 
 def _parse_time_string(time_str: str | None) -> time | None:
@@ -153,11 +151,7 @@ async def update_todo_partial(
     await db.refresh(todo)
 
     templates = request.app.state.templates
-    return templates.TemplateResponse(
-        request=request,
-        name="partials/todo-item.html",
-        context={"todo": todo},
-    )
+    return templates.TemplateResponse("partials/todo-item.html", {"request": request, "todo": todo})
 
 
 @router.delete("/todos/{todo_id}", response_class=HTMLResponse)

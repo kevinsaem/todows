@@ -51,13 +51,11 @@ async def index(
     today_str = f"{today.year}년 {today.month}월 {today.day}일 {weekdays[today.weekday()]}"
 
     templates = request.app.state.templates
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={
-            "today_str": today_str,
-            "todo_count": len(todos),
-            "incomplete_todos": incomplete_todos,
-            "completed_todos": completed_todos,
-        },
-    )
+    context = {
+        "request": request,
+        "today_str": today_str,
+        "todo_count": len(todos),
+        "incomplete_todos": incomplete_todos,
+        "completed_todos": completed_todos,
+    }
+    return templates.TemplateResponse("index.html", context)
