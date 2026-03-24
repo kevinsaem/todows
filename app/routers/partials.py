@@ -48,12 +48,26 @@ async def _get_today_todos(db: AsyncSession) -> list[Todo]:
     return list(result.scalars().all())
 
 
+def _render_todo_list(request: Request, todos: list[Todo]) -> HTMLResponse:
+    """할일 목록 파셜 HTML 렌더링 (공통 헬퍼)"""
+    incomplete_todos = [t for t in todos if not t.is_completed]
+    completed_todos = [t for t in todos if t.is_completed]
+    templates = request.app.state.templates
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/todo-list.html",
+        context={
+            "incomplete_todos": incomplete_todos,
+            "completed_todos": completed_todos,
+        },
+    )
+
+
 def _parse_time_string(time_str: str | None) -> time | None:
     """시간 문자열을 time 객체로 변환 (유효하지 않으면 None)"""
     if not time_str or not time_str.strip():
         return None
     try:
-        # "HH:MM" 또는 "HH:MM:SS" 형식 지원
         parts = time_str.strip().split(":")
         hour = int(parts[0])
         minute = int(parts[1]) if len(parts) > 1 else 0
@@ -83,22 +97,7 @@ async def get_todo_list_partial(
 ) -> HTMLResponse:
     """할일 목록 HTML 파셜 반환"""
     todos = await _get_today_todos(db)
-
-    # 미완료 / 완료 분리
-    incomplete_todos = [t for t in todos if not t.is_completed]
-    completed_todos = [t for t in todos if t.is_completed]
-
-    templates = request.app.state.templates
-    html = templates.TemplateResponse(
-        "partials/todo-list.html",
-        {
-            "request": request,
-            "incomplete_todos": incomplete_todos,
-            "completed_todos": completed_todos,
-            "total_count": len(todos),
-        },
-    )
-    return html
+    return _render_todo_list(request, todos)
 
 
 @router.post("/todos", response_class=HTMLResponse)
@@ -111,13 +110,11 @@ async def create_todo_partial(
     db: AsyncSession = Depends(get_db),
 ) -> HTMLResponse:
     """할일 등록 후 목록 HTML 반환"""
-    # 제목 유효성 검사
     if not title or not title.strip():
         raise HTTPException(status_code=400, detail="제목은 필수입니다")
     if len(title.strip()) > 200:
         raise HTTPException(status_code=400, detail="제목은 200자까지 입력 가능합니다")
 
-    # 할일 생성
     todo = Todo(
         title=title.strip(),
         description=description.strip() if description else None,
@@ -127,21 +124,8 @@ async def create_todo_partial(
     db.add(todo)
     await db.flush()
 
-    # 오늘 할일 목록 다시 조회하여 반환
     todos = await _get_today_todos(db)
-    incomplete_todos = [t for t in todos if not t.is_completed]
-    completed_todos = [t for t in todos if t.is_completed]
-
-    templates = request.app.state.templates
-    return templates.TemplateResponse(
-        "partials/todo-list.html",
-        {
-            "request": request,
-            "incomplete_todos": incomplete_todos,
-            "completed_todos": completed_todos,
-            "total_count": len(todos),
-        },
-    )
+    return _render_todo_list(request, todos)
 
 
 @router.put("/todos/{todo_id}", response_class=HTMLResponse)
@@ -157,7 +141,6 @@ async def update_todo_partial(
     """할일 수정 후 해당 항목 HTML 반환"""
     todo = await _get_todo_or_404(todo_id, db)
 
-    # 제목 유효성 검사
     if not title or not title.strip():
         raise HTTPException(status_code=400, detail="제목은 필수입니다")
 
@@ -171,8 +154,9 @@ async def update_todo_partial(
 
     templates = request.app.state.templates
     return templates.TemplateResponse(
-        "partials/todo-item.html",
-        {"request": request, "todo": todo},
+        request=request,
+        name="partials/todo-item.html",
+        context={"todo": todo},
     )
 
 
@@ -187,20 +171,8 @@ async def delete_todo_partial(
     await db.delete(todo)
     await db.flush()
 
-    # 전체 목록 다시 조회하여 반환
     todos = await _get_today_todos(db)
-    incomplete_todos = [t for t in todos if not t.is_completed]
-    completed_todos = [t for t in todos if t.is_completed]
-
-    templates = request.app.state.templates
-    return templates.TemplateResponse(
-        "partials/todo-list.html",
-        {
-            "request": request,
-            "incomplete_todos": incomplete_todos,
-            "completed_todos": completed_todos,
-        },
-    )
+    return _render_todo_list(request, todos)
 
 
 @router.patch("/todos/{todo_id}/toggle", response_class=HTMLResponse)
@@ -215,17 +187,5 @@ async def toggle_todo_partial(
 
     await db.flush()
 
-    # 전체 목록 다시 조회하여 반환 (프론트엔드가 #todo-list-container innerHTML을 교체함)
     todos = await _get_today_todos(db)
-    incomplete_todos = [t for t in todos if not t.is_completed]
-    completed_todos = [t for t in todos if t.is_completed]
-
-    templates = request.app.state.templates
-    return templates.TemplateResponse(
-        "partials/todo-list.html",
-        {
-            "request": request,
-            "incomplete_todos": incomplete_todos,
-            "completed_todos": completed_todos,
-        },
-    )
+    return _render_todo_list(request, todos)

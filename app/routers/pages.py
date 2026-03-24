@@ -52,9 +52,9 @@ async def index(
 
     templates = request.app.state.templates
     return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
+        request=request,
+        name="index.html",
+        context={
             "today_str": today_str,
             "todo_count": len(todos),
             "incomplete_todos": incomplete_todos,
