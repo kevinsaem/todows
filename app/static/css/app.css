@@ -1,0 +1,78 @@
+/* 할일 앱 커스텀 스타일 */
+
+/* Alpine.js x-cloak: 초기화 전 숨김 */
+[x-cloak] {
+  display: none !important;
+}
+
+/* HTMX swap 전환 효과 */
+.htmx-swap-transition {
+  transition: all 0.2s ease-in-out;
+}
+
+.htmx-swapping {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.htmx-settling {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.htmx-added {
+  animation: fadeSlideIn 0.25s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 녹음 중 빨간 점 애니메이션 */
+.recording-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #EF4444;
+  animation: pulse-recording 1s ease-in-out infinite;
+}
+
+@keyframes pulse-recording {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.3);
+  }
+}
+
+/* 부드러운 스크롤 */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* iOS 입력창 확대 방지 (16px 이상 보장) */
+input, textarea, select {
+  font-size: 16px !important;
+}
+
+/* 체크박스 터치 영역 피드백 */
+button:active {
+  transition: transform 0.1s;
+}
+
+/* 완료 항목 취소선 */
+.line-through {
+  text-decoration: line-through;
+}

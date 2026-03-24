@@ -1,0 +1,36 @@
+{% if incomplete_todos or completed_todos %}
+  <!-- 미완료 할일 -->
+  <div class="space-y-2">
+    {% for todo in incomplete_todos %}
+      {% with todo=todo %}
+        {% include "partials/todo-item.html" %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+
+  <!-- 완료 구분선 -->
+  {% if completed_todos %}
+  <div class="flex items-center my-4">
+    <div class="flex-1 border-t border-gray-300"></div>
+    <span class="px-3 text-sm text-gray-400">완료</span>
+    <div class="flex-1 border-t border-gray-300"></div>
+  </div>
+
+  <!-- 완료된 할일 -->
+  <div class="space-y-2">
+    {% for todo in completed_todos %}
+      {% with todo=todo %}
+        {% include "partials/todo-item.html" %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+{% else %}
+  <!-- 빈 상태 -->
+  <div class="flex flex-col items-center justify-center py-20 text-center">
+    <div class="text-5xl mb-4">&#128203;</div>
+    <p class="text-lg text-gray-500 font-medium">오늘 할 일이 없어요</p>
+    <p class="text-sm text-gray-400 mt-1">아래 버튼으로 추가하세요</p>
+  </div>
+{% endif %}

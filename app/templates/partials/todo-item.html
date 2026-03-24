@@ -1,0 +1,41 @@
+<div id="todo-{{ todo.id }}"
+     data-testid="todo-item"
+     class="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm {{ 'completed opacity-50' if todo.is_completed else '' }} htmx-swap-transition">
+  <!-- 체크박스 -->
+  <button hx-patch="/partials/todos/{{ todo.id }}/toggle"
+          hx-target="#todo-list-container"
+          hx-swap="innerHTML transition:true"
+          data-testid="todo-checkbox"
+          class="min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0">
+    {% if todo.is_completed %}
+      <span class="w-6 h-6 rounded-md bg-blue-500 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </span>
+    {% else %}
+      <span class="w-6 h-6 rounded-md border-2 border-gray-300"></span>
+    {% endif %}
+  </button>
+
+  <!-- 시간 + 제목 (탭하면 수정) -->
+  <div class="flex-1 min-w-0 cursor-pointer min-h-[44px] flex items-center"
+       data-todo-id="{{ todo.id }}"
+       data-todo-title="{{ todo.title | e }}"
+       data-todo-description="{{ (todo.description or '') | e }}"
+       data-todo-time="{{ todo.scheduled_time or '' }}"
+       @click="openForm({id: $el.dataset.todoId, title: $el.dataset.todoTitle, description: $el.dataset.todoDescription, scheduled_time: $el.dataset.todoTime})">
+    <div class="flex items-center gap-2 w-full">
+      <span class="text-sm text-gray-400 flex-shrink-0 w-12 text-center">
+        {% if todo.scheduled_time %}
+          {{ todo.scheduled_time.strftime('%H:%M') if todo.scheduled_time is not string else todo.scheduled_time[:5] }}
+        {% else %}
+          --:--
+        {% endif %}
+      </span>
+      <span class="text-base truncate {{ 'line-through text-gray-400' if todo.is_completed else 'text-gray-800' }}">
+        {{ todo.title }}
+      </span>
+    </div>
+  </div>
+</div>

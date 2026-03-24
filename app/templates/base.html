@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#3B82F6">
+  <title>{% block title %}할일 앱{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script src="/static/js/voice.js" defer></script>
+  <script src="/static/js/time-parser.js" defer></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-md mx-auto min-h-screen relative">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
