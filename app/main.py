@@ -5,6 +5,9 @@
 Jinja2 템플릿, CORS, 정적 파일, 라우터를 설정한다.
 """
 
+import logging
+import os
+import traceback
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator
@@ -49,8 +52,6 @@ app = FastAPI(
 )
 
 # ─── CORS 설정 ───
-
-import os
 
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:8000").split(",")
 
@@ -109,6 +110,7 @@ async def bad_request_handler(request: Request, exc: Exception) -> JSONResponse:
 @app.exception_handler(500)
 async def internal_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """500 에러 핸들러"""
+    logging.error(f"500 에러 발생: {exc}\n{traceback.format_exc()}")
     return JSONResponse(
         status_code=500,
         content={"error": "서버 오류가 발생했습니다"},

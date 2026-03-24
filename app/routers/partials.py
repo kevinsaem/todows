@@ -10,7 +10,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
-from sqlalchemy import select
+from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -39,7 +39,8 @@ async def _get_today_todos(db: AsyncSession) -> list[Todo]:
         .where(Todo.scheduled_date == today)
         .order_by(
             Todo.is_completed.asc(),
-            Todo.scheduled_time.asc().nullslast(),
+            case((Todo.scheduled_time.is_(None), 1), else_=0),
+            Todo.scheduled_time.asc(),
             Todo.created_at.asc(),
         )
     )

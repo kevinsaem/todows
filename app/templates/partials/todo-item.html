@@ -28,7 +28,7 @@
     <div class="flex items-center gap-2 w-full">
       <span class="text-sm text-gray-400 flex-shrink-0 w-12 text-center">
         {% if todo.scheduled_time %}
-          {{ todo.scheduled_time.strftime('%H:%M') if todo.scheduled_time is not string else todo.scheduled_time[:5] }}
+          {{ todo.scheduled_time | string | truncate(5, True, '') }}
         {% else %}
           --:--
         {% endif %}

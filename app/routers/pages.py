@@ -8,7 +8,7 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from sqlalchemy import select
+from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -33,7 +33,8 @@ async def index(
         .where(Todo.scheduled_date == today)
         .order_by(
             Todo.is_completed.asc(),
-            Todo.scheduled_time.asc().nullslast(),
+            case((Todo.scheduled_time.is_(None), 1), else_=0),
+            Todo.scheduled_time.asc(),
             Todo.created_at.asc(),
         )
     )
